@@ -1,11 +1,11 @@
-import React, { useMemo, useEffect } from 'react';
+import  { useMemo, useEffect } from 'react';
 import { useCart } from '../context/context';
 import type { Product } from '../types/type';
 import CheckoutProductCard from '../components/CheckoutCard';
 import { toast } from 'react-toastify';
 
-// Extend Product to include quantity
-type CartItem = Product & { quantity: number };
+
+
 
 // Helper to convert price string to number
 const extractNumberFromPrice = (price: string | number | undefined): number => {

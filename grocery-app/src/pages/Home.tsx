@@ -18,7 +18,7 @@ const Home: React.FC<HomeProps> = ({ searchTerm }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { addToCart, cartItems } = useCart();
+  const { addToCart } = useCart();
 
   const handleAddToCart = (product: Product) => {
     addToCart(product);
