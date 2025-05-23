@@ -3,13 +3,17 @@ import type { Product } from '../types/type'
 import { FiShoppingCart } from 'react-icons/fi'
 import { FaHeart } from 'react-icons/fa'
 
+
+
 interface Props {
   product: Product,
   onAddToCart: (product: Product) => void;
+  available: number;
 }
 
-const ProductCard: React.FC<Props> = ({ product, onAddToCart }) => {
+const ProductCard: React.FC<Props> = ({ product, onAddToCart, available }) => {
   const [isExpanded, setIsExpanded] = useState(false)
+
 
   const toggleReadMore = () => setIsExpanded(!isExpanded)
 
@@ -51,13 +55,13 @@ const ProductCard: React.FC<Props> = ({ product, onAddToCart }) => {
         <div>
           <div className="mb-2">
             {/* Stock availability logic */}
-            {product.available >= 10 ? (
+            {available >= 10 ? (
               <span className="font-medium px-4 py-1 bg-green-600 text-white rounded-full">
                 Available
               </span>
             ) : (
               <span className="bg-orange-600 px-4 py-1 rounded-full font-medium text-white">
-                Only {product.available} left
+                Only {available} left
               </span>
             )}
           </div>

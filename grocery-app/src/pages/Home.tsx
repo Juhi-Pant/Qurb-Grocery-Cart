@@ -18,12 +18,24 @@ const Home: React.FC<HomeProps> = ({ searchTerm }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { addToCart } = useCart();
+  const { addToCart, getAvailableStock, cartItems } = useCart();
+
 
   const handleAddToCart = (product: Product) => {
-    addToCart(product);
-    toast.success(`${product.name} added to cart!`);
+    const result = addToCart(product);
+    if (result === 'out-of-stock') {
+      toast.error(`${product.name} is out of stock!`);
+      return;
+    }
+    else{
+      toast.success(`${product.name} added to cart!`);
+    }
+    
   };
+
+  useEffect(() => {
+  console.log('Cart changed', cartItems);
+}, [cartItems]);
 
   // Fetch product data on initial render
   useEffect(() => {
@@ -41,8 +53,8 @@ const Home: React.FC<HomeProps> = ({ searchTerm }) => {
 
   // Filter products based on selected category and search input
   const filteredProducts = useFilteredProducts(products, category, searchTerm);
-
   return (
+    
     <div className="p-4 min-h-screen">
       {/* Category Filter Buttons */}
       <div className="flex gap-2 mb-4 flex-wrap">
@@ -69,9 +81,14 @@ const Home: React.FC<HomeProps> = ({ searchTerm }) => {
         {!loading && filteredProducts.length === 0 && (
           <p className="text-gray-500 mt-4">No products found.</p>
         )}
-        {filteredProducts.map((product) => (
-          <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
-        ))}
+
+
+        {filteredProducts.map((product) => {
+          const available = getAvailableStock(product)
+          return (
+          <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} available={available} />
+          )
+        })}
       </div>
     </div>
   );

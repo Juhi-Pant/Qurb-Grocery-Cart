@@ -38,52 +38,84 @@ const Checkout = () => {
     }, 0);
   }, [cartItems]);
 
-  // Offer logic runs when cartItems change
-  useEffect(() => {
-    const freebies: Product[] = [];
-    const newAppliedOffers = { coke: false, coffee: false };
+const handleIncrease = (productId: string) => {
+  const item = cartItems.find(item => item.id === productId);
+  if (!item) return;
 
-    // Offer: Buy 6 Coca-Colas, get 1 free
-    const cocaCola = cartItems.find(item => item.name.toLowerCase() === 'coca-cola');
-    if (cocaCola && cocaCola.quantity >= 6) {
-      freebies.push({
-        ...cocaCola,
-        id: 'free-coke',
-        name: 'Free Coca-Cola',
-        price: 0,
-        img: cocaCola.img,
-        type: cocaCola.type,
-        available: 1,
-        description: 'Free item offer'
-      });
+  if (item.quantity >= item.available) {
+    // Already at max stock, show error
+    toast.error('Cannot increase quantity, stock limit reached');
+    return;
+  }
+
+  // Quantity can be increased, so call the function
+  increaseQuantity(productId);
+  toast.success('Quantity increased');
+};
+
+
+
+useEffect(() => {
+  const freebies: Product[] = [];
+  const newAppliedOffers = { coke: false, coffee: false };
+
+  const cocaCola = cartItems.find(item => item.name.toLowerCase() === 'coca-cola');
+  const croissant = cartItems.find(item => item.name.toLowerCase() === 'croissants');
+
+  // --- Prepare Coke Freebies ---
+  let freeCokeCount = 0;
+  if (cocaCola) {
+    freeCokeCount = Math.floor(cocaCola.quantity / 6);
+    if (freeCokeCount > 0) {
       newAppliedOffers.coke = true;
-      if (!appliedOffers.coke) {
-        toast.info(`Offer applied: Free Coca-Cola`);
+      for (let i = 0; i < freeCokeCount; i++) {
+        freebies.push({
+          ...cocaCola,
+          id: `free-coke-${i + 1}`,
+          name: 'Free Coca-Cola',
+          price: 0,
+          img: cocaCola.img,
+          type: cocaCola.type,
+          available: 1,
+          description: 'Free item offer',
+        });
       }
     }
+  }
 
-    // Offer: Buy 3 croissants, get 1 coffee free
-    const croissant = cartItems.find(item => item.name.toLowerCase() === 'croissants');
-    if (croissant && croissant.quantity >= 3) {
-      freebies.push({
-        id: 'free-coffee',
-        name: 'Free Coffee',
-        price: 0,
-        type: 'drinks',
-        img: '',
-        available: 1,
-        description: 'Free coffee with croissant offer'
-      });
+  // --- Prepare Coffee Freebies ---
+  let freeCoffeeCount = 0;
+  if (croissant) {
+    freeCoffeeCount = Math.floor(croissant.quantity / 3);
+    if (freeCoffeeCount > 0) {
       newAppliedOffers.coffee = true;
-      if (!appliedOffers.coffee) {
-        toast.info(`Offer applied: Free Coffee`);
+      for (let i = 0; i < freeCoffeeCount; i++) {
+        freebies.push({
+          id: `free-coffee-${i + 1}`,
+          name: 'Free Coffee',
+          price: 0,
+          type: 'drinks',
+          img: '',
+          available: 1,
+          description: 'Free coffee with croissant offer',
+        });
       }
     }
+  }
 
-    // Update cart context with free items and applied offers
-    setFreeItems(freebies);
-    setAppliedOffers(newAppliedOffers);
-  }, [cartItems, setFreeItems, setAppliedOffers]);
+  // Update state only after preparing everything
+  setFreeItems(freebies);
+  setAppliedOffers(newAppliedOffers);
+
+  // Show toasts after setting new state (do not include appliedOffers in deps)
+  if (freeCokeCount > 0 && !appliedOffers.coke) {
+    toast.info(`Offer applied: Free Coca-Cola x${freeCokeCount}`);
+  }
+  if (freeCoffeeCount > 0 && !appliedOffers.coffee) {
+    toast.info(`Offer applied: Free Coffee x${freeCoffeeCount}`);
+  }
+}, [cartItems, setFreeItems, setAppliedOffers]);
+
 
   // Calculate total discount (price of free items)
   const totalDiscount = useMemo(() => {
@@ -106,7 +138,7 @@ const Checkout = () => {
             <CheckoutProductCard
               key={item.id}
               product={item}
-              onIncrease={() => increaseQuantity(item.id)}
+              onIncrease={() => handleIncrease(item.id)}
               onDecrease={() => decreaseQuantity(item.id)}
               onRemove={() => deleteFromCart(item.id)}
             />

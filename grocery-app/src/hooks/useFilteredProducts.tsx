@@ -16,10 +16,12 @@ const useFilteredProducts = (
     }
 
     if (searchTerm) {
-      filtered = filtered.filter((product) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
+  filtered = filtered.filter((product) =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+}
+
 
     return filtered;
   }, [products, category, searchTerm]);
